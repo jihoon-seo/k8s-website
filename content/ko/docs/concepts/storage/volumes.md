@@ -11,11 +11,14 @@ weight: 10
 
 <!-- overview -->
 
-컨테이너 내의 디스크에 있는 파일은 임시적이며, 컨테이너에서 실행될 때
-애플리케이션에 적지 않은 몇 가지 문제가 발생한다. 한 가지 문제는
-컨테이너가 크래시될 때 파일이 손실된다는 것이다. kubelet은 컨테이너를 다시 시작하지만
-초기화된 상태이다. 두 번째 문제는 `Pod`에서 같이 실행되는 컨테이너간에
-파일을 공유할 때 발생한다.
+컨테이너 내의 디스크에 있는 파일은 임시적이며, 
+컨테이너에서 실행될 때 애플리케이션에 적지 않은 몇 가지 문제가 발생한다. 
+그 중 한 가지는 컨테이너가 크래시되거나 멈췄을 때 발생한다. 
+컨테이너의 상태가 저장되지 않으므로 
+컨테이너가 실행되는 동안 생성되었거나 수정된 모든 파일이 손실된다. 
+크래시 과정에서, kubelet은 컨테이너를 깨끗한 상태로 재시작한다. 
+또 다른 문제는 하나의 파드 안에서 실행되는 여러 컨테이너가 파일을 함께 이용해야 할 때 발생한다. 
+모든 컨테이너 간에 공유되는 파일시스템을 구축하고 이것에 접근하는 것은 어려운 문제일 수 있다.
 쿠버네티스 {{< glossary_tooltip text="볼륨" term_id="volume" >}} 추상화는
 이러한 문제를 모두 해결한다.
 [파드](/ko/docs/concepts/workloads/pods/)에 대해 익숙해지는 것을 추천한다.
@@ -24,17 +27,12 @@ weight: 10
 
 ## 배경
 
-도커는 다소 느슨하고, 덜 관리되지만
-[볼륨](https://docs.docker.com/storage/)이라는
-개념을 가지고 있다. 도커 볼륨은 디스크에 있는 디렉터리이거나
-다른 컨테이너에 있다. 도커는 볼륨
-드라이버를 제공하지만, 기능이 다소 제한된다.
-
 쿠버네티스는 다양한 유형의 볼륨을 지원한다. {{< glossary_tooltip term_id="pod" text="파드" >}}는
 여러 볼륨 유형을 동시에 사용할 수 있다.
 임시 볼륨 유형은 파드의 수명을 갖지만, 퍼시스턴트 볼륨은
-파드의 수명을 넘어 존재한다. 파드가 더 이상 존재하지 않으면, 쿠버네티스는 임시(ephemeral) 볼륨을 삭제하지만,
-퍼시스턴트(persistent) 볼륨은 삭제하지 않는다.
+파드의 수명을 넘어 존재한다. 파드가 더 이상 존재하지 않으면, 
+쿠버네티스는 [임시(ephemeral) 볼륨](/ko/docs/concepts/storage/ephemeral-volumes/)을 삭제하지만,
+[퍼시스턴트(persistent) 볼륨](/ko/docs/concepts/storage/persistent-volumes/)은 삭제하지 않는다.
 볼륨의 종류와 상관없이, 파드 내의 컨테이너가 재시작되어도 데이터는 보존된다.
 
 기본적으로 볼륨은 디렉터리이며, 일부 데이터가 있을 수 있으며, 파드
@@ -291,13 +289,17 @@ spec:
 `path` 에서 파생된다.
 
 {{< note >}}
+
 * [컨피그맵](/docs/tasks/configure-pod-container/configure-pod-configmap/)을 사용하기 위해서는
   먼저 컨피그맵을 생성해야 한다.
+
+* 컨피그맵은 항상 `readOnly`로 마운트된다.
 
 * 컨피그맵을 [`subPath`](#using-subpath) 볼륨 마운트로 사용하는 컨테이너는 컨피그맵
 업데이트를 수신하지 않는다.
 
 * 텍스트 데이터는 UTF-8 문자 인코딩을 사용하는 파일로 노출된다. 다른 문자 인코딩의 경우, `binaryData` 를 사용한다.
+
 {{< /note >}}
 
 ### downwardAPI {#downwardapi}
@@ -388,7 +390,8 @@ targetWWN은 해당 WWN이 다중 경로 연결에서 온 것으로 예상한다
 쿠버네티스 호스트가 해당 LUN에 접근할 수 있다.
 {{< /note >}}
 
-더 자세한 내용은 [파이버 채널 예시](https://github.com/kubernetes/examples/tree/master/staging/volumes/fibre_channel)를 참고한다.
+더 자세한 내용은 
+[파이버 채널 예시](https://github.com/kubernetes/examples/tree/master/staging/volumes/fibre_channel)를 참고한다.
 
 ### gcePersistentDisk (사용 중단됨) {#gcepersistentdisk}
 
@@ -515,7 +518,9 @@ GCE PD의 `CSIMigration` 기능이 활성화된 경우 기존 인-트리 플러�
 ### gitRepo (사용 중단됨) {#gitrepo}
 
 {{< warning >}}
-`gitRepo` 볼륨 유형은 사용 중단되었다. git repo가 있는 컨테이너를 프로비전 하려면 초기화 컨테이너(InitContainer)에 [EmptyDir](#emptydir)을 마운트하고, 여기에 git을 사용해서 repo를 복제하고, [EmptyDir](#emptydir)을 파드 컨테이너에 마운트 한다.
+`gitRepo` 볼륨 유형은 사용 중단되었다. 
+git repo가 있는 컨테이너를 프로비전 하려면 초기화 컨테이너(InitContainer)에 [EmptyDir](#emptydir)을 마운트하고, 
+여기에 git을 사용해서 repo를 복제하고, [EmptyDir](#emptydir)을 파드 컨테이너에 마운트 한다.
 {{< /warning >}}
 
 `gitRepo` 볼륨은 볼륨 플러그인의 예시이다. 이 플러그인은
@@ -546,7 +551,7 @@ spec:
 
 <!-- maintenance note: OK to remove all mention of glusterfs once the v1.25 release of
 Kubernetes has gone out of support -->
--
+
 쿠버네티스 {{< skew currentVersion >}} 는 `glusterfs` 볼륨 타입을 포함하지 않는다.
 
 GlusterFS 인-트리 스토리지 드라이버는 쿠버네티스 1.25에서 사용 중단되었고
@@ -785,10 +790,13 @@ spec:
 {{< note >}}
 사용하려면 먼저 NFS 서버를 실행하고 공유를 내보내야 한다.
 
-또한 파드 스펙에 NFS 마운트 옵션을 명시할 수 없음을 기억하라. 마운트 옵션을 서버에서 설정하거나, [/etc/nfsmount.conf](https://man7.org/linux/man-pages/man5/nfsmount.conf.5.html)를 사용해야 한다. 마운트 옵션을 설정할 수 있게 허용하는 퍼시스턴트볼륨을 통해 NFS 볼륨을 마운트할 수도 있다.
+또한 파드 스펙에 NFS 마운트 옵션을 명시할 수 없음을 기억하라. 
+마운트 옵션을 서버에서 설정하거나, [/etc/nfsmount.conf](https://man7.org/linux/man-pages/man5/nfsmount.conf.5.html)를 사용해야 한다. 
+마운트 옵션을 설정할 수 있게 허용하는 퍼시스턴트볼륨을 통해 NFS 볼륨을 마운트할 수도 있다.
 {{< /note >}}
 
-퍼시스턴트볼륨을 사용하여 NFS 볼륨을 마운트하는 예제는 [NFS 예시](https://github.com/kubernetes/examples/tree/master/staging/volumes/nfs)를 본다.
+퍼시스턴트볼륨을 사용하여 NFS 볼륨을 마운트하는 예제는 
+[NFS 예시](https://github.com/kubernetes/examples/tree/master/staging/volumes/nfs)를 본다.
 
 ### persistentVolumeClaim {#persistentvolumeclaim}
 
@@ -920,12 +928,14 @@ tmpfs(RAM 기반 파일시스템)로 지원되기 때문에 비 휘발성 스토
 기록되지 않는다.
 
 {{< note >}}
-사용하기 위해선 먼저 쿠버네티스 API에서 시크릿을 생성해야 한다.
-{{< /note >}}
 
-{{< note >}}
-시크릿을 [`subPath`](#using-subpath) 볼륨 마운트로 사용하는 컨테이너는 시크릿
-업데이트를 수신하지 못한다.
+* 사용하기 위해선 먼저 쿠버네티스 API에서 시크릿을 생성해야 한다.
+
+* 시크릿은 항상 `readOnly`로 마운트된다.
+
+* 시크릿을 [`subPath`](#using-subpath) 볼륨 마운트로 사용하는 컨테이너는 
+  시크릿 업데이트를 수신하지 못한다.
+
 {{< /note >}}
 
 더 자세한 내용은 [시크릿 구성하기](/ko/docs/concepts/configuration/secret/)를 참고한다.
@@ -1132,10 +1142,9 @@ CSI 호환 볼륨 드라이버가 쿠버네티스 클러스터에 배포되면
   정의된 CSI 드라이버가 `CreateVolumeResponse` 의 `volume.id` 필드에 반환하는 값과 일치해야 한다.
   이 값은 볼륨을 참조할 때 CSI 볼륨 드라이버에 대한 모든 호출에
   `volume_id` 값을 전달한다.
-* `readOnly`: 볼륨을 읽기 전용으로 "ControllerPublished" (연결)할지
-  여부를 나타내는 선택적인 불리언(boolean) 값. 기본적으로 false 이다. 이 값은
-  `ControllerPublishVolumeRequest` 의 `readonly` 필드를
-  통해 CSI 드라이버로 전달된다.
+* `readOnly`: 볼륨을 읽기 전용으로 "ControllerPublished" (연결)할지 여부를 나타내는 
+  선택적인 불리언(boolean) 값. 기본적으로 false 이다. 
+  이 값은 `ControllerPublishVolumeRequest` 의 `readonly` 필드를 통해 CSI 드라이버로 전달된다.
 * `fsType`: 만약 PV의 `VolumeMode` 가 `Filesystem` 인 경우에 이 필드는
   볼륨을 마운트하는 데 사용해야 하는 파일시스템을 지정하는 데 사용될 수 있다. 만약
   볼륨이 포맷되지 않았고 포맷이 지원되는 경우, 이 값은

@@ -228,7 +228,7 @@ $ kubectl get crd volumesnapshotcontent -o yaml
 사용자가 기존 `VolumeSnapshot`으로부터 `PersistentVolumeClaim`을 생성할 때
 기존 소스와 다른 볼륨 모드를 지정할 수 있도록 하려면,
 `VolumeSnapshot`와 연관된 `VolumeSnapshotContent`에
-`snapshot.storage.kubernetes.io/allowVolumeModeChange: "true"` 어노테이션을 추가해야 한다.
+`snapshot.storage.kubernetes.io/allow-volume-mode-change: "true"` 어노테이션을 추가해야 한다.
 
 이전에 프로비전된 스냅샷의 경우에는, 클러스터 관리자가 `spec.sourceVolumeMode`를
 추가해야 한다.
@@ -241,7 +241,7 @@ kind: VolumeSnapshotContent
 metadata:
   name: new-snapshot-content-test
   annotations:
-    - snapshot.storage.kubernetes.io/allowVolumeModeChange: "true"
+    - snapshot.storage.kubernetes.io/allow-volume-mode-change: "true"
 spec:
   deletionPolicy: Delete
   driver: hostpath.csi.k8s.io

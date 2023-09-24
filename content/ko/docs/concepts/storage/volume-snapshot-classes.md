@@ -17,9 +17,6 @@ weight: 61 # just after volume snapshots
 [볼륨 스냅샷](/ko/docs/concepts/storage/volume-snapshots/)과
 [스토리지 클래스](/ko/docs/concepts/storage/storage-classes)의 숙지를 추천한다.
 
-
-
-
 <!-- body -->
 
 ## 소개
@@ -40,7 +37,8 @@ weight: 61 # just after volume snapshots
 생성된 이후에는 업데이트할 수 없다.
 
 {{< note >}}
-CRD의 설치는 쿠버네티스 배포판의 책임이다. 필요한 CRD가 존재하지 않는다면, 볼륨스냅샷클래스 생성이 실패할 것이다.
+CRD의 설치는 쿠버네티스 배포판의 책임이다. 
+필요한 CRD가 존재하지 않는다면, 볼륨스냅샷클래스 생성이 실패할 것이다.
 {{< /note >}}
 
 ```yaml
@@ -76,9 +74,14 @@ parameters:
 
 ### 삭제정책(DeletionPolicy)
 
-볼륨 스냅샷 클래스는 삭제정책을 가지고 있다. 바인딩된 볼륨스냅샷 오브젝트를 삭제할 때 VolumeSnapshotContent의 상황을 구성할 수 있다. 볼륨 스냅샷 클래스의 삭제정책은 `Retain` 또는 `Delete` 일 수 있다. 이 필드는 반드시 지정해야 한다.
+볼륨 스냅샷 클래스는 삭제정책을 가지고 있다. 
+바인딩된 볼륨스냅샷 오브젝트를 삭제할 때 VolumeSnapshotContent의 상황을 구성할 수 있다. 
+볼륨 스냅샷 클래스의 삭제정책은 `Retain` 또는 `Delete` 일 수 있다. 
+이 필드는 반드시 지정해야 한다.
 
-삭제정책이 `Delete` 인 경우 기본 스토리지 스냅샷이 VolumeSnapshotContent 오브젝트와 함께 삭제된다. 삭제정책이 `Retain` 인 경우 기본 스냅샷과 VolumeSnapshotContent 모두 유지된다.
+삭제정책이 `Delete` 인 경우 
+기본 스토리지 스냅샷이 VolumeSnapshotContent 오브젝트와 함께 삭제된다. 
+삭제정책이 `Retain` 인 경우 기본 스냅샷과 VolumeSnapshotContent 모두 유지된다.
 
 ## 파라미터
 
